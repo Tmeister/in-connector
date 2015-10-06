@@ -114,6 +114,7 @@ class In_Connector_Public
         $from_email     = isset($data['from_email']) ? $data['from_email'] : 'team@nohatdigital.com';
         $from_address   = $from_name . ' <' . $from_email . '>';
         $email_template = str_replace('<course_url>', $referer, $email_template);
+        $question_tags  = ($data['tags']) ? $data['tags'] : false;
 
         if (isset($data['infusion_id'])) {
             $infusion_id = intval($data['infusion_id']);
@@ -136,6 +137,14 @@ class In_Connector_Public
             }
 
             $added = InfusionProxy::getInstance()->getApp()->grpAssign($infusion_id, $cat_id);
+            //error_log(print_r($added, true));
+            foreach ($question_tags as $q) {
+                //error_log('=> ' . $q['tag'] . ' => ' . $q['answer']);
+                $subcat_id = $this->get_infusion_cat_id('', $suffix . ' - ' . $q['tag']);
+                //error_log('QUESTION TAG ' . $subcat_id);
+                $added = InfusionProxy::getInstance()->getApp()->grpAssign($infusion_id, $subcat_id);
+            }
+
             $this->json_output(array('status' => 'success'));
         } else {
             $this->json_output(array('status' => 'fail'));
