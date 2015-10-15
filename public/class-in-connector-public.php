@@ -114,7 +114,8 @@ class In_Connector_Public
         $from_email     = isset($data['from_email']) ? $data['from_email'] : 'team@nohatdigital.com';
         $from_address   = $from_name . ' <' . $from_email . '>';
         $email_template = str_replace('<course_url>', $referer, $email_template);
-        $question_tags  = ($data['tags']) ? $data['tags'] : false;
+        $question_tags  = ($data['tags']) ? $data['tags'] : array();
+        $skip_email     = isset($data['skip_email']) ? $data['skip_email'] : false;
 
         if (isset($data['infusion_id'])) {
             $infusion_id = intval($data['infusion_id']);
@@ -127,7 +128,13 @@ class In_Connector_Public
             }
         }
 
-        $send = $this->send_email_via_infusion($infusion_id, $from_address, $email_template, $email_subject);
+        if( !$skip_email ){
+            error_log('SEND THE EMAIL');
+            $send = $this->send_email_via_infusion($infusion_id, $from_address, $email_template, $email_subject);
+        }else{
+            error_log('DONT SEND THE EMAIL');
+            $send = true;
+        }
         //error_log('Enviado => ' . $send);
         if ($send) {
             if ($suffix) {
@@ -282,8 +289,8 @@ class In_Connector_Public
     private function json_output($data)
     {
 
+        header('Access-Control-Allow-Headers: Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type, Authorization');
         header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Headers: accept, access-control-allow-headers, content-type');
         header('Content-Type: application/json');
 
         echo json_encode($data);
